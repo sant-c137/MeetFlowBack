@@ -16,8 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from MeetFlowV1.views import * # Es mejor importar explícitamente
-# from . import views # Si urls.py está en el mismo directorio que py
+from MeetFlowV1.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,6 +29,8 @@ urlpatterns = [
 
     # Events
     path("api/events/", event_list_create_view, name="event_list_create"),
+    path("api/users/search/", user_search_view, name="user_search"),
+    path('api/events/search/', event_search_view, name='event_search'),
     path("api/events/<int:event_id>/", event_detail_view, name="event_detail"),
 
     # Event Options (add only by creator)
