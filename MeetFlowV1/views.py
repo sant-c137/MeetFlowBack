@@ -3,12 +3,7 @@ from django.http import (
     HttpResponseForbidden,
     HttpResponseNotFound,
 )
-from django.contrib.auth import (
-    authenticate,
-    login,
-    logout,
-    get_user_model
-)
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -24,13 +19,12 @@ from .models import (
     TimeOption,
     LocationOption,
     Invitation,
+    Notification,
     TimeVote,
     LocationVote,
-    Notification,
 )
 
 User = get_user_model()
-
 
 @csrf_exempt
 def login_view(request):
@@ -298,28 +292,97 @@ def event_detail_view(request, event_id):
     event = get_object_or_404(Event, pk=event_id)
 
     if request.method == "GET":
-        event_data = model_to_dict(event)
+        event_data = model_to_dict(
+            event, exclude=["chosen_time_option", "chosen_location_option"]
+        )
         event_data["creator"] = event.creator.username
         event_data["status_display"] = event.get_status_display()
+        event_data["is_creator"] = request.user == event.creator
 
-        event_data["time_options"] = list(
-            event.time_options.all().values("id", "start_time", "end_time")
-        )
-        event_data["location_options"] = list(
-            event.location_options.all().values("id", "name", "address", "details")
-        )
+        if event.creation_date:
+            event_data["creation_date"] = event.creation_date.isoformat()
+        else:
+            event_data["creation_date"] = None
 
-        invitations_data = []
-        for inv in event.invitations.all():
-            invitations_data.append(
-                {
-                    "id": inv.id,
-                    "user_id": inv.user.id,
-                    "username": inv.user.username,
-                    "status": inv.status,
-                    "status_display": inv.get_status_display(),
-                }
-            )
+        time_options_data = []
+        for toption in (
+            event.time_options.all()
+            .order_by("start_time")
+            .prefetch_related("votes__user")
+        ):
+            option_data = {
+                "id": toption.id,
+                "start_time": (
+                    toption.start_time.isoformat() if toption.start_time else None
+                ),
+                "end_time": toption.end_time.isoformat() if toption.end_time else None,
+                "user_vote": None,
+            }
+
+            user_vote = toption.votes.filter(user=request.user).first()
+            if user_vote:
+                option_data["user_vote"] = user_vote.preference
+
+            if request.user == event.creator:
+                votes_detail = [
+                    {
+                        "user_id": vote.user.id,
+                        "username": vote.user.username,
+                        "preference": vote.preference,
+                        "voted_at": (
+                            vote.voted_at.isoformat() if vote.voted_at else None
+                        ),
+                    }
+                    for vote in toption.votes.filter(preference__gt=0)
+                ]
+                option_data["all_votes"] = votes_detail
+                option_data["vote_count"] = len(votes_detail)
+
+            time_options_data.append(option_data)
+        event_data["time_options"] = time_options_data
+
+        location_options_data = []
+        for loption in event.location_options.all().prefetch_related("votes__user"):
+            option_data = {
+                "id": loption.id,
+                "name": loption.name,
+                "address": loption.address,
+                "details": loption.details,
+                "user_vote": None,
+            }
+
+            user_vote = loption.votes.filter(user=request.user).first()
+            if user_vote:
+                option_data["user_vote"] = user_vote.preference
+
+            if request.user == event.creator:
+                votes_detail = [
+                    {
+                        "user_id": vote.user.id,
+                        "username": vote.user.username,
+                        "preference": vote.preference,
+                        "voted_at": (
+                            vote.voted_at.isoformat() if vote.voted_at else None
+                        ),
+                    }
+                    for vote in loption.votes.filter(preference__gt=0)
+                ]
+                option_data["all_votes"] = votes_detail
+                option_data["vote_count"] = len(votes_detail)
+
+            location_options_data.append(option_data)
+        event_data["location_options"] = location_options_data
+
+        invitations_data = [
+            {
+                "id": inv.id,
+                "user_id": inv.user.id,
+                "username": inv.user.username,
+                "status": inv.status,
+                "status_display": inv.get_status_display(),
+            }
+            for inv in event.invitations.select_related("user").all()
+        ]
         event_data["invitations"] = invitations_data
 
         return JsonResponse(event_data, status=200)
@@ -362,11 +425,13 @@ def event_detail_view(request, event_id):
                     )
 
         event.save()
-        return JsonResponse(model_to_dict(event), status=200)
+
+        updated_data = model_to_dict(event)
+        updated_data["creator"] = event.creator.username
+        updated_data["status_display"] = event.get_status_display()
+        return JsonResponse(updated_data, status=200)
 
     elif request.method == "DELETE":
-        event_title = event.title
-
         event.delete()
         return JsonResponse({"message": "Event deleted successfully"}, status=204)
 
@@ -536,32 +601,55 @@ def respond_invitation_view(request, invitation_id):
 @login_required
 @require_http_methods(["GET"])
 def list_my_invitations_view(request):
-
     invitations_qs = (
         Invitation.objects.filter(user=request.user)
         .select_related("event", "event__creator")
-        .prefetch_related("event__time_options")
+        .prefetch_related(
+            "event__time_options__votes", "event__location_options__votes"
+        )
         .order_by("-sent_date")
     )
 
     data = []
     for inv in invitations_qs:
         event_time_options_data = []
-        first_time_option = inv.event.time_options.order_by("start_time").first()
-        if first_time_option:
+
+        for toption in inv.event.time_options.all().order_by("start_time"):
+            user_vote_obj = None
+
+            for vote in toption.votes.all():
+                if vote.user_id == request.user.id:
+                    user_vote_obj = vote
+                    break
+
             event_time_options_data.append(
                 {
-                    "id": first_time_option.id,
+                    "id": toption.id,
                     "start_time": (
-                        first_time_option.start_time.isoformat()
-                        if first_time_option.start_time
-                        else None
+                        toption.start_time.isoformat() if toption.start_time else None
                     ),
                     "end_time": (
-                        first_time_option.end_time.isoformat()
-                        if first_time_option.end_time
-                        else None
+                        toption.end_time.isoformat() if toption.end_time else None
                     ),
+                    "user_vote": user_vote_obj.preference if user_vote_obj else None,
+                }
+            )
+
+        event_location_options_data = []
+        for loption in inv.event.location_options.all():
+            user_vote_obj = None
+            for vote in loption.votes.all():
+                if vote.user_id == request.user.id:
+                    user_vote_obj = vote
+                    break
+
+            event_location_options_data.append(
+                {
+                    "id": loption.id,
+                    "name": loption.name,
+                    "address": loption.address,
+                    "details": loption.details,
+                    "user_vote": user_vote_obj.preference if user_vote_obj else None,
                 }
             )
 
@@ -580,100 +668,14 @@ def list_my_invitations_view(request):
                     "description": inv.event.description,
                     "creator_username": inv.event.creator.username,
                     "status_display": inv.event.get_status_display(),
-                    "time_options": event_time_options_data,
+                    "status": inv.event.status,
                     "creation_date": inv.event.creation_date.isoformat(),
+                    "time_options": event_time_options_data,
+                    "location_options": event_location_options_data,
                 },
             }
         )
     return JsonResponse(data, safe=False, status=200)
-
-
-@csrf_exempt
-@login_required
-@require_http_methods(["POST"])
-def vote_time_option_view(request, time_option_id):
-    time_option = get_object_or_404(TimeOption, pk=time_option_id)
-    event = time_option.event
-
-    if (
-        not Invitation.objects.filter(
-            event=event,
-            user=request.user,
-            status__in=["pending", "accepted", "tentative"],
-        ).exists()
-        and event.creator != request.user
-    ):
-        return HttpResponseForbidden(
-            "You must be invited or the creator to vote on this event's options."
-        )
-
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-
-    preference = data.get("preference")
-    if preference is None or not (0 <= int(preference) <= 5):
-        return JsonResponse({"error": "Preference (0-5) is required"}, status=400)
-
-    vote, created = TimeVote.objects.update_or_create(
-        user=request.user,
-        time_option=time_option,
-        defaults={"preference": int(preference)},
-    )
-    return JsonResponse(
-        {
-            "message": "Vote recorded." if created else "Vote updated.",
-            "vote_id": vote.id,
-            "time_option_id": time_option.id,
-            "preference": vote.preference,
-        },
-        status=201 if created else 200,
-    )
-
-
-@csrf_exempt
-@login_required
-@require_http_methods(["POST"])
-def vote_location_option_view(request, location_option_id):
-    location_option = get_object_or_404(LocationOption, pk=location_option_id)
-    event = location_option.event
-
-    if (
-        not Invitation.objects.filter(
-            event=event,
-            user=request.user,
-            status__in=["pending", "accepted", "tentative"],
-        ).exists()
-        and event.creator != request.user
-    ):
-        return HttpResponseForbidden(
-            "You must be invited or the creator to vote on this event's options."
-        )
-
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
-
-    preference = data.get("preference")
-    if preference is None or not (0 <= int(preference) <= 5):
-        return JsonResponse({"error": "Preference (0-5) is required"}, status=400)
-
-    vote, created = LocationVote.objects.update_or_create(
-        user=request.user,
-        location_option=location_option,
-        defaults={"preference": int(preference)},
-    )
-    return JsonResponse(
-        {
-            "message": "Vote recorded." if created else "Vote updated.",
-            "vote_id": vote.id,
-            "location_option_id": location_option.id,
-            "preference": vote.preference,
-        },
-        status=201 if created else 200,
-    )
 
 
 @login_required
@@ -792,3 +794,177 @@ def event_search_view(request):
         results_data.append(data_item)
 
     return JsonResponse(results_data, safe=False)
+
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def vote_on_time_option_view(request, option_id):
+    time_option = get_object_or_404(TimeOption, pk=option_id)
+    event = time_option.event
+
+    try:
+        invitation = Invitation.objects.get(event=event, user=request.user)
+        if invitation.status not in ["accepted", "tentative"]:
+            return JsonResponse(
+                {"error": "You must accept or be tentative to vote."}, status=403
+            )
+    except Invitation.DoesNotExist:
+        return JsonResponse({"error": "You are not invited to this event."}, status=403)
+
+    if event.status not in ["draft", "planning"]:
+        return JsonResponse(
+            {
+                "error": f"Voting is not allowed for events in '{event.get_status_display()}' status."
+            },
+            status=403,
+        )
+
+    try:
+        data = json.loads(request.body)
+        preference = data.get("preference")
+        if not isinstance(preference, int):
+            return JsonResponse({"error": "Invalid preference value."}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    vote, created = TimeVote.objects.update_or_create(
+        user=request.user,
+        time_option=time_option,
+        event=event,
+        defaults={"preference": preference, "voted_at": timezone.now()},
+    )
+
+    return JsonResponse(
+        {
+            "message": (
+                "Vote recorded successfully."
+                if created
+                else "Vote updated successfully."
+            ),
+            "vote_id": vote.id,
+            "time_option_id": time_option.id,
+            "preference": vote.preference,
+        },
+        status=201 if created else 200,
+    )
+
+
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def vote_on_location_option_view(request, option_id):
+    location_option = get_object_or_404(LocationOption, pk=option_id)
+    event = location_option.event
+
+    try:
+        invitation = Invitation.objects.get(event=event, user=request.user)
+        if invitation.status not in ["accepted", "tentative"]:
+            return JsonResponse(
+                {"error": "You must accept or be tentative to vote."}, status=403
+            )
+    except Invitation.DoesNotExist:
+        return JsonResponse({"error": "You are not invited to this event."}, status=403)
+
+    if event.status not in ["draft", "planning"]:
+        return JsonResponse(
+            {
+                "error": f"Voting is not allowed for events in '{event.get_status_display()}' status."
+            },
+            status=403,
+        )
+
+    try:
+        data = json.loads(request.body)
+        preference = data.get("preference")
+        if not isinstance(preference, int):
+            return JsonResponse({"error": "Invalid preference value."}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON."}, status=400)
+
+    vote, created = LocationVote.objects.update_or_create(
+        user=request.user,
+        location_option=location_option,
+        event=event,
+        defaults={"preference": preference, "voted_at": timezone.now()},
+    )
+
+    return JsonResponse(
+        {
+            "message": (
+                "Vote recorded successfully."
+                if created
+                else "Vote updated successfully."
+            ),
+            "vote_id": vote.id,
+            "location_option_id": location_option.id,
+            "preference": vote.preference,
+        },
+        status=201 if created else 200,
+    )
+
+
+@login_required
+@require_http_methods(["GET"])
+def event_votes_summary_view(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+
+    if event.creator != request.user:
+        return HttpResponseForbidden("Only the event creator can view vote summaries.")
+
+    time_options_votes = []
+    for toption in event.time_options.all().prefetch_related("votes__user"):
+        votes_data = []
+        for vote in toption.votes.filter(preference__gt=0):
+            votes_data.append(
+                {
+                    "user_id": vote.user.id,
+                    "username": vote.user.username,
+                    "preference": vote.preference,
+                    "voted_at": vote.voted_at.isoformat(),
+                }
+            )
+        time_options_votes.append(
+            {
+                "id": toption.id,
+                "start_time": (
+                    toption.start_time.isoformat() if toption.start_time else None
+                ),
+                "end_time": toption.end_time.isoformat() if toption.end_time else None,
+                "votes": votes_data,
+                "vote_count": len(votes_data),
+            }
+        )
+
+    location_options_votes = []
+    for loption in event.location_options.all().prefetch_related("votes__user"):
+        votes_data = []
+        for vote in loption.votes.filter(preference__gt=0):
+            votes_data.append(
+                {
+                    "user_id": vote.user.id,
+                    "username": vote.user.username,
+                    "preference": vote.preference,
+                    "voted_at": vote.voted_at.isoformat(),
+                }
+            )
+        location_options_votes.append(
+            {
+                "id": loption.id,
+                "name": loption.name,
+                "address": loption.address,
+                "details": loption.details,
+                "votes": votes_data,
+                "vote_count": len(votes_data),
+            }
+        )
+
+    return JsonResponse(
+        {
+            "event_id": event.id,
+            "event_title": event.title,
+            "time_options_summary": time_options_votes,
+            "location_options_summary": location_options_votes,
+        },
+        status=200,
+    )

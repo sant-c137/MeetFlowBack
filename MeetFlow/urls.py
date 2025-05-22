@@ -36,7 +36,6 @@ urlpatterns = [
     # Event Options (add only by creator)
     path("api/events/<int:event_id>/time_options/", add_time_option_view, name="add_time_option"),
     path("api/events/<int:event_id>/location_options/", add_location_option_view, name="add_location_option"),
-    # (Podrías añadir Detail/Update/Delete para options si es necesario)
 
     # Invitations
     path("api/events/<int:event_id>/invite/", invite_user_view, name="invite_user"),
@@ -46,12 +45,11 @@ urlpatterns = [
     # User listing for inviting
     path("api/events/<int:event_id>/potential_invitees/", list_users_for_inviting_view, name="list_potential_invitees"),
 
-
-    # Voting
-    path("api/time_options/<int:time_option_id>/vote/", vote_time_option_view, name="vote_time_option"),
-    path("api/location_options/<int:location_option_id>/vote/", vote_location_option_view, name="vote_location_option"),
-    # (Podrías añadir endpoints para ver resultados de votaciones por evento/opción)
-
+     # Voting
+    path("api/time_options/<int:option_id>/vote/", vote_on_time_option_view, name="vote_time_option"),
+    path("api/location_options/<int:option_id>/vote/", vote_on_location_option_view, name="vote_location_option"),
+    path("api/events/<int:event_id>/votes/", event_votes_summary_view, name="event_votes_summary"), # Para que el creador vea los votos
+    
     # Notifications
     path("api/notifications/", list_my_notifications_view, name="my_notifications"),
     path("api/notifications/<int:notification_id>/read/", mark_notification_read_view, name="mark_notification_read"),
