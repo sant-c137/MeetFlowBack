@@ -26,6 +26,7 @@ from .models import (
 
 User = get_user_model()
 
+
 @csrf_exempt
 def login_view(request):
     if request.method == "POST":
@@ -317,6 +318,7 @@ def event_detail_view(request, event_id):
                 ),
                 "end_time": toption.end_time.isoformat() if toption.end_time else None,
                 "user_vote": None,
+                "vote_count": toption.votes.filter(preference__gt=0).count(),
             }
 
             user_vote = toption.votes.filter(user=request.user).first()
@@ -336,7 +338,6 @@ def event_detail_view(request, event_id):
                     for vote in toption.votes.filter(preference__gt=0)
                 ]
                 option_data["all_votes"] = votes_detail
-                option_data["vote_count"] = len(votes_detail)
 
             time_options_data.append(option_data)
         event_data["time_options"] = time_options_data
@@ -349,6 +350,7 @@ def event_detail_view(request, event_id):
                 "address": loption.address,
                 "details": loption.details,
                 "user_vote": None,
+                "vote_count": loption.votes.filter(preference__gt=0).count(),
             }
 
             user_vote = loption.votes.filter(user=request.user).first()
@@ -368,7 +370,6 @@ def event_detail_view(request, event_id):
                     for vote in loption.votes.filter(preference__gt=0)
                 ]
                 option_data["all_votes"] = votes_detail
-                option_data["vote_count"] = len(votes_detail)
 
             location_options_data.append(option_data)
         event_data["location_options"] = location_options_data
