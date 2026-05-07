@@ -16,10 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from MeetFlowV1.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # API Schema & Docs
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     # Auth
     path("api/login/", login_view, name="login"),
@@ -48,10 +54,21 @@ urlpatterns = [
      # Voting
     path("api/time_options/<int:option_id>/vote/", vote_on_time_option_view, name="vote_time_option"),
     path("api/location_options/<int:option_id>/vote/", vote_on_location_option_view, name="vote_location_option"),
-    path("api/events/<int:event_id>/votes/", event_votes_summary_view, name="event_votes_summary"), # Para que el creador vea los votos
+    path("api/events/<int:event_id>/votes/", event_votes_summary_view, name="event_votes_summary"), # For the creator to see votes
     
     # Notifications
     path("api/notifications/", list_my_notifications_view, name="my_notifications"),
     path("api/notifications/<int:notification_id>/read/", mark_notification_read_view, name="mark_notification_read"),
     path("api/notifications/mark_all_read/", mark_all_notifications_read_view, name="mark_all_notifications_read"),
+
+    # Education platform
+    path("api/map/", MapProgressView.as_view(), name="map_progress"),
+    path("api/module/<int:module_id>/lessons/", ModuleLessonsView.as_view(), name="module_lessons"),
+    path("api/exercise/<int:exercise_id>/submit/", ExerciseSubmitView.as_view(), name="exercise_submit"),
+    path("api/module/<int:module_id>/ai_reinforcement/", AIGenerateLessonView.as_view(), name="ai_reinforcement"),
+
+    # Adaptive Learning V2
+    path("api/units/<int:unit_id>/session/", UnitSessionView.as_view(), name="unit_session"),
+    path("api/exercises/<int:exercise_id>/check/", ExerciseCheckView.as_view(), name="exercise_check"),
+    path("api/user/stats/", UserStatsView.as_view(), name="user_stats"),
 ]

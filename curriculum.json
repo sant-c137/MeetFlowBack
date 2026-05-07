@@ -1,0 +1,583 @@
+[
+  {
+    "module_title": "Introduction to Python",
+    "order": 1,
+    "position_x": 100.0,
+    "position_y": 100.0,
+    "dependencies": [],
+    "units": [
+      {
+        "unit_title": "Variables and Print",
+        "order": 1,
+        "exercises": [
+          {
+            "type": "BLANKS",
+            "order": 1,
+            "title": "Hello, World!",
+            "instruction": "Complete the code to display 'Hello, World!' on the screen.",
+            "content": {
+              "code_template": "{{input}}('Hello, World!')",
+              "options": ["print", "show", "display", "echo"]
+            },
+            "solution": {
+              "expected": "print"
+            },
+            "ai_focus": "basic print function syntax"
+          },
+          {
+            "type": "PARSONS",
+            "order": 2,
+            "title": "Store and Show",
+            "instruction": "Arrange the blocks to create a variable and then print it.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "name = 'Alex'" },
+                { "id": "b2", "text": "print(name)" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "print 'Alex'" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2"]
+            },
+            "ai_focus": "variable declaration before usage sequence"
+          },
+          {
+            "type": "DEBUG",
+            "order": 3,
+            "title": "Text Needs Quotes",
+            "instruction": "This code throws an error. Click the line with the syntax bug.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "message = Hello" },
+                { "id": "l2", "text": "print(message)" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l1",
+              "explanation": "Text values (strings) must be wrapped in quotes, like 'Hello'."
+            },
+            "ai_focus": "missing quotes in string literals"
+          },
+          {
+            "type": "BLANKS",
+            "order": 4,
+            "title": "Assigning Numbers",
+            "instruction": "Choose the correct symbol to assign the number 25 to the variable 'age'.",
+            "content": {
+              "code_template": "age {{input}} 25\nprint(age)",
+              "options": ["=", "==", "->", ":"]
+            },
+            "solution": {
+              "expected": "="
+            },
+            "ai_focus": "assignment operator (=) vs others"
+          },
+          {
+            "type": "DEBUG",
+            "order": 5,
+            "title": "Case Sensitivity",
+            "instruction": "Why isn't this printing 100? Find the mistake.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "score = 100" },
+                { "id": "l2", "text": "print(Score)" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l2",
+              "explanation": "Python is case-sensitive. 'Score' with a capital 'S' is not the same as 'score'."
+            },
+            "ai_focus": "variable case sensitivity"
+          },
+          {
+            "type": "PARSONS",
+            "order": 6,
+            "title": "Multiple Variables",
+            "instruction": "Drag the blocks to assign two words to variables and print them together.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "word1 = 'Game'" },
+                { "id": "b2", "text": "word2 = 'Over'" },
+                { "id": "b3", "text": "print(word1, word2)" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "print(word1 word2)" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3"]
+            },
+            "ai_focus": "printing multiple variables separated by commas"
+          },
+          {
+            "type": "CODE",
+            "order": 7,
+            "title": "Mini Challenge: Create a Variable",
+            "instruction": "Create a variable named 'player' and assign it the text 'Mario'.",
+            "content": {
+              "initial_code": "# Write your code below:\n",
+              "expected_output": "",
+              "pyodide_test_code": "assert 'player' in locals(), 'You must create a variable named player'\nassert player == 'Mario', 'The player variable must be equal to Mario'"
+            },
+            "solution": {
+              "reference_code": "player = 'Mario'"
+            },
+            "ai_focus": "declaring string variables from scratch"
+          },
+          {
+            "type": "CODE",
+            "order": 8,
+            "title": "Final Boss: Print Output",
+            "instruction": "Use the print command to display exactly the word 'Start!' on the screen.",
+            "content": {
+              "initial_code": "# Write your code below:\n",
+              "expected_output": "Start!",
+              "pyodide_test_code": ""
+            },
+            "solution": {
+              "reference_code": "print('Start!')"
+            },
+            "ai_focus": "writing the print function completely from scratch"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "module_title": "Python Basics: Conditionals",
+    "order": 2,
+    "position_x": 300.0,
+    "position_y": 100.0,
+    "dependencies": ["Introduction to Python"],
+    "units": [
+      {
+        "unit_title": "If, Elif, and Else",
+        "order": 1,
+        "exercises": [
+          {
+            "type": "BLANKS",
+            "order": 1,
+            "title": "Your First Condition",
+            "instruction": "Complete the statement to check if the user is 18 or older.",
+            "content": {
+              "code_template": "age = 20\n{{input}} age >= 18:\n    print('You are an adult!')",
+              "options": ["if", "else", "elif", "for"]
+            },
+            "solution": {
+              "expected": "if"
+            },
+            "ai_focus": "basic 'if' syntax"
+          },
+          {
+            "type": "PARSONS",
+            "order": 2,
+            "title": "Order the Logic",
+            "instruction": "Arrange the blocks to create a working if/else statement.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "if score >= 50:" },
+                { "id": "b2", "text": "    print('You passed!')" },
+                { "id": "b3", "text": "else:" },
+                { "id": "b4", "text": "    print('You failed.')" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "elif:" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3", "b4"]
+            },
+            "ai_focus": "if/else block structure and indentation"
+          },
+          {
+            "type": "DEBUG",
+            "order": 3,
+            "title": "Missing Syntax",
+            "instruction": "This code is broken. Click on the line that has a syntax error.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "weather = 'rain'" },
+                { "id": "l2", "text": "if weather == 'rain'" },
+                { "id": "l3", "text": "    print('Take an umbrella')" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l2",
+              "explanation": "In Python, conditional statements must end with a colon (:)."
+            },
+            "ai_focus": "missing colons in conditionals"
+          },
+          {
+            "type": "BLANKS",
+            "order": 4,
+            "title": "Comparison Operators",
+            "instruction": "Fill in the correct operator to check if 'lives' are exactly equal to 0.",
+            "content": {
+              "code_template": "if lives {{input}} 0:\n    print('Game Over')",
+              "options": ["=", "==", ">", "<", "!="]
+            },
+            "solution": {
+              "expected": "=="
+            },
+            "ai_focus": "difference between assignment (=) and comparison (==)"
+          },
+          {
+            "type": "DEBUG",
+            "order": 5,
+            "title": "Watch the Space",
+            "instruction": "Find the indentation error in this block.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "is_active = True" },
+                { "id": "l2", "text": "if is_active:" },
+                { "id": "l3", "text": "print('User is online')" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l3",
+              "explanation": "The code inside an 'if' block must be indented (usually by 4 spaces)."
+            },
+            "ai_focus": "indentation errors"
+          },
+          {
+            "type": "PARSONS",
+            "order": 6,
+            "title": "Multiple Conditions (Elif)",
+            "instruction": "Drag the blocks to check if a number is positive, negative, or zero.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "if num > 0:" },
+                { "id": "b2", "text": "    print('Positive')" },
+                { "id": "b3", "text": "elif num < 0:" },
+                { "id": "b4", "text": "    print('Negative')" },
+                { "id": "b5", "text": "else:" },
+                { "id": "b6", "text": "    print('Zero')" }
+              ],
+              "trap_blocks": []
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3", "b4", "b5", "b6"]
+            },
+            "ai_focus": "if-elif-else execution flow"
+          },
+          {
+            "type": "CODE",
+            "order": 7,
+            "title": "Mini Challenge: Write an If",
+            "instruction": "Write an if statement that prints 'Hello' if the variable 'greet' is True.",
+            "content": {
+              "initial_code": "greet = True\n# Write your code below:\n",
+              "expected_output": "Hello",
+              "pyodide_test_code": ""
+            },
+            "solution": {
+              "reference_code": "if greet:\n    print('Hello')"
+            },
+            "ai_focus": "writing conditionals from scratch"
+          },
+          {
+            "type": "CODE",
+            "order": 8,
+            "title": "Final Boss: If/Else",
+            "instruction": "Create an if/else statement. If 'wallet' is greater than or equal to 10, print 'Buy'. Otherwise, print 'Wait'.",
+            "content": {
+              "initial_code": "wallet = 5\n# Write your code below:\n",
+              "expected_output": "Wait",
+              "pyodide_test_code": ""
+            },
+            "solution": {
+              "reference_code": "if wallet >= 10:\n    print('Buy')\nelse:\n    print('Wait')"
+            },
+            "ai_focus": "combining condition checking and fallback logic"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "module_title": "Python Basics: Lists",
+    "order": 3,
+    "position_x": 500.0,
+    "position_y": 100.0,
+    "dependencies": ["Python Basics: Conditionals"],
+    "units": [
+      {
+        "unit_title": "Working with Lists",
+        "order": 1,
+        "exercises": [
+          {
+            "type": "BLANKS",
+            "order": 1,
+            "title": "Your First List",
+            "instruction": "Choose the correct bracket to start a list containing three game names.",
+            "content": {
+              "code_template": "games = {{input}}'Zelda', 'Mario', 'Sonic']\nprint(games)",
+              "options": ["[", "(", "{", "<"]
+            },
+            "solution": {
+              "expected": "["
+            },
+            "ai_focus": "understanding list syntax and square brackets"
+          },
+          {
+            "type": "PARSONS",
+            "order": 2,
+            "title": "The First Item",
+            "instruction": "Arrange the blocks to create a list and print its first item. Remember, Python starts counting at 0!",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "colors = ['red', 'blue', 'green']" },
+                { "id": "b2", "text": "first_color = colors[0]" },
+                { "id": "b3", "text": "print(first_color)" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "first_color = colors[1]" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3"]
+            },
+            "ai_focus": "zero-based indexing in Python lists"
+          },
+          {
+            "type": "DEBUG",
+            "order": 3,
+            "title": "Off By One",
+            "instruction": "This code tries to print the third item ('potion'), but it throws an error. Find the buggy line.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "items = ['sword', 'shield', 'potion']" },
+                { "id": "l2", "text": "print(items[3])" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l2",
+              "explanation": "Because counting starts at 0, the third item is at index 2. Index 3 is completely out of bounds!"
+            },
+            "ai_focus": "IndexError and out-of-bounds array access"
+          },
+          {
+            "type": "BLANKS",
+            "order": 4,
+            "title": "Adding to a List",
+            "instruction": "Which built-in method adds a new item to the very end of an existing list?",
+            "content": {
+              "code_template": "inventory = ['map']\ninventory.{{input}}('compass')\nprint(inventory)",
+              "options": ["append", "add", "insert", "push"]
+            },
+            "solution": {
+              "expected": "append"
+            },
+            "ai_focus": "using the append() method on lists"
+          },
+          {
+            "type": "DEBUG",
+            "order": 5,
+            "title": "Method Mayhem",
+            "instruction": "Find the syntax mistake when trying to count how many items are in the party list.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "party =['mage', 'knight']" },
+                { "id": "l2", "text": "size = len party" },
+                { "id": "l3", "text": "print(size)" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l2",
+              "explanation": "'len' is a function, not a keyword. It requires parentheses around the list, like this: len(party)"
+            },
+            "ai_focus": "using the len() function correctly with parentheses"
+          },
+          {
+            "type": "PARSONS",
+            "order": 6,
+            "title": "Change Your Mind",
+            "instruction": "Arrange the code to replace the second 'apple' with a 'banana', then print the updated list.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "fruits = ['apple', 'apple', 'cherry']" },
+                { "id": "b2", "text": "fruits[1] = 'banana'" },
+                { "id": "b3", "text": "print(fruits)" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "fruits.append('banana')" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3"]
+            },
+            "ai_focus": "modifying specific list elements using index assignment"
+          },
+          {
+            "type": "CODE",
+            "order": 7,
+            "title": "Mini Challenge: Make a List",
+            "instruction": "Create a list named 'scores' containing exactly three numbers: 10, 20, and 30 (in that order).",
+            "content": {
+              "initial_code": "# Write your code below:\n",
+              "expected_output": "",
+              "pyodide_test_code": "assert 'scores' in locals(), 'You must create a list named scores'\nassert scores == [10, 20, 30], 'The scores list must contain [10, 20, 30]'"
+            },
+            "solution": {
+              "reference_code": "scores = [10, 20, 30]"
+            },
+            "ai_focus": "creating populated lists of integers from scratch"
+          },
+          {
+            "type": "CODE",
+            "order": 8,
+            "title": "Final Boss: Inventory Manager",
+            "instruction": "The 'backpack' list already exists. First, add the word 'apple' to it. Then, print the FIRST item in the backpack.",
+            "content": {
+              "initial_code": "# 'backpack' is provided for you\n# Write your code below:\n",
+              "expected_output": "water",
+              "pyodide_test_code": "assert 'apple' in backpack, 'You must add apple to the backpack'"
+            },
+            "solution": {
+              "reference_code": "backpack.append('apple')\nprint(backpack[0])"
+            },
+            "ai_focus": "combining list methods (.append) with index access (list[0])"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "module_title": "Python Basics: Loops",
+    "order": 4,
+    "position_x": 700.0,
+    "position_y": 100.0,
+    "dependencies": ["Python Basics: Lists"],
+    "units": [
+      {
+        "unit_title": "For and While Loops",
+        "order": 1,
+        "exercises": [
+          {
+            "type": "BLANKS",
+            "order": 1,
+            "title": "Looping Through a List",
+            "instruction": "Fill in the missing keyword to loop through each item in the 'games' list.",
+            "content": {
+              "code_template": "{{input}} game in games:\n    print(game)",
+              "options": ["for", "while", "loop", "if"]
+            },
+            "solution": {
+              "expected": "for"
+            },
+            "ai_focus": "basic 'for ... in ...' loop syntax"
+          },
+          {
+            "type": "PARSONS",
+            "order": 2,
+            "title": "While the Condition is True",
+            "instruction": "Arrange the blocks to create a 'while' loop that counts from 1 to 3.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "count = 1" },
+                { "id": "b2", "text": "while count <= 3:" },
+                { "id": "b3", "text": "    print(count)" },
+                { "id": "b4", "text": "    count = count + 1" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "if count <= 3:" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3", "b4"]
+            },
+            "ai_focus": "while loop structure and manual variable incrementing"
+          },
+          {
+            "type": "DEBUG",
+            "order": 3,
+            "title": "Missing Syntax",
+            "instruction": "This loop is broken. Find the line that has a syntax error.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "for number in [1, 2, 3]" },
+                { "id": "l2", "text": "    print(number)" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l1",
+              "explanation": "Just like 'if' statements, 'for' and 'while' loops must end with a colon (:)."
+            },
+            "ai_focus": "missing colons in loop declarations"
+          },
+          {
+            "type": "BLANKS",
+            "order": 4,
+            "title": "Generating Numbers",
+            "instruction": "Choose the correct function to make the loop run exactly 5 times (from 0 to 4).",
+            "content": {
+              "code_template": "for x in {{input}}(5):\n    print(x)",
+              "options": ["range", "list", "count", "number"]
+            },
+            "solution": {
+              "expected": "range"
+            },
+            "ai_focus": "using the range() function for iteration"
+          },
+          {
+            "type": "DEBUG",
+            "order": 5,
+            "title": "Wrong Condition",
+            "instruction": "We want to stop the loop when 'energy' reaches 0. Why won't this loop run at all? Find the bug.",
+            "content": {
+              "lines": [
+                { "id": "l1", "text": "energy = 5" },
+                { "id": "l2", "text": "while energy == 0:" },
+                { "id": "l3", "text": "    print('Running')" },
+                { "id": "l4", "text": "    energy -= 1" }
+              ]
+            },
+            "solution": {
+              "error_line_id": "l2",
+              "explanation": "The loop only runs while the condition is True. 'energy == 0' is False at the start. It should be 'while energy > 0:'."
+            },
+            "ai_focus": "logical errors in while loop conditions"
+          },
+          {
+            "type": "PARSONS",
+            "order": 6,
+            "title": "Filtering Items",
+            "instruction": "Arrange the blocks to loop through the 'levels' list and print ONLY the numbers greater than 10.",
+            "content": {
+              "blocks": [
+                { "id": "b1", "text": "for level in levels:" },
+                { "id": "b2", "text": "    if level > 10:" },
+                { "id": "b3", "text": "        print(level)" }
+              ],
+              "trap_blocks": [{ "id": "t1", "text": "if levels > 10:" }]
+            },
+            "solution": {
+              "correct_order": ["b1", "b2", "b3"]
+            },
+            "ai_focus": "nesting an if statement inside a for loop with correct indentation"
+          },
+          {
+            "type": "CODE",
+            "order": 7,
+            "title": "Mini Challenge: Repeat Greetings",
+            "instruction": "Write a 'for' loop using the 'range()' function to print the word 'Hello' exactly 3 times.",
+            "content": {
+              "initial_code": "# Write your code below:\n",
+              "expected_output": "Hello\nHello\nHello",
+              "pyodide_test_code": ""
+            },
+            "solution": {
+              "reference_code": "for i in range(3):\n    print('Hello')"
+            },
+            "ai_focus": "writing a for-range loop from scratch"
+          },
+          {
+            "type": "CODE",
+            "order": 8,
+            "title": "Final Boss: Countdown",
+            "instruction": "The variable 'timer' is provided. Write a 'while' loop that prints the timer and then decreases it by 1. Stop when it reaches 0 (do not print 0).",
+            "content": {
+              "initial_code": "# 'timer' has a hidden number.\n# Write your code below:\n",
+              "expected_output": "3\n2\n1",
+              "pyodide_test_code": ""
+            },
+            "solution": {
+              "reference_code": "while timer > 0:\n    print(timer)\n    timer -= 1"
+            },
+            "ai_focus": "writing a while loop with a decremental counter"
+          }
+        ]
+      }
+    ]
+  }
+]
